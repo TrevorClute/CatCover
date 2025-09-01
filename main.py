@@ -97,7 +97,7 @@ def motion_detector(args):
 def parse_args():
     p = argparse.ArgumentParser(
         description="Simple motion detection from Raspberry Pi camera.")
-    p.add_argument("--min-area", type=int, default=26000,
+    p.add_argument("--min-area", type=int, default=32000,
                    help="Minimum contour area to consider as motion (higher = less sensitive).")
     p.add_argument("--cooldown", type=float, default=1.0,
                    help="Seconds to wait between motion prints (debounce).")
@@ -111,7 +111,8 @@ def parse_args():
 if __name__ == "__main__":
     try:
         args = parse_args()
-        motion_detector(args)
+        # motion_detector(args)
+        servo_motor.close()
 
     except KeyboardInterrupt:
         servo_motor.pi.stop()

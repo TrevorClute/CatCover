@@ -21,7 +21,7 @@ class ServoMotor:
             return
         self.pi.set_servo_pulsewidth(CLOSE_GPIO, 1380)
         self.pi.set_servo_pulsewidth(OPEN_GPIO, 1515)
-        time.sleep(0.8)
+        time.sleep(0.9)
         self.pi.set_servo_pulsewidth(CLOSE_GPIO, 0)
         self.pi.set_servo_pulsewidth(OPEN_GPIO, 0)
         self.is_open = False
@@ -31,7 +31,7 @@ class ServoMotor:
             return
         self.pi.set_servo_pulsewidth(OPEN_GPIO, 1385)
         self.pi.set_servo_pulsewidth(CLOSE_GPIO, 1490)
-        time.sleep(1)
+        time.sleep(1.1)
         self.pi.set_servo_pulsewidth(OPEN_GPIO, 0)
         self.pi.set_servo_pulsewidth(CLOSE_GPIO, 0)
         self.is_open = True
