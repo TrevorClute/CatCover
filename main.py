@@ -88,16 +88,14 @@ def motion_detector(args):
             last_event_ts = now
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(f"[MOTION] {timestamp} | area≈{int(biggest_area)}")
-            if servo_motor.is_open:
-                servo_motor.close()
-            else:
-                servo_motor.open()
+            cv2.imwrite(f"{timestamp}.jpg", frame)
+
 
 
 def parse_args():
     p = argparse.ArgumentParser(
         description="Simple motion detection from Raspberry Pi camera.")
-    p.add_argument("--min-area", type=int, default=32000,
+    p.add_argument("--min-area", type=int, default=1000,
                    help="Minimum contour area to consider as motion (higher = less sensitive).")
     p.add_argument("--cooldown", type=float, default=1.0,
                    help="Seconds to wait between motion prints (debounce).")
@@ -105,14 +103,21 @@ def parse_args():
                    help="Show live preview and motion mask (GUI).")
     p.add_argument("--width", type=int, default=640, help="Frame width.")
     p.add_argument("--height", type=int, default=480, help="Frame height.")
+    p.add_argument("--open", type=int, default=0, help="open")
+    p.add_argument("--close", type=int, default=0, help="open")
     return p.parse_args()
 
 
 if __name__ == "__main__":
     try:
         args = parse_args()
-        # motion_detector(args)
-        servo_motor.close()
+        motion_detector(args)
+
+        print(args.open)
+        if args.open == 1:
+            servo_motor.open()
+        elif args.close == 1:
+            servo_motor.close()
 
     except KeyboardInterrupt:
         servo_motor.pi.stop()

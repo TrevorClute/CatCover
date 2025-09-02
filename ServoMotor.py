@@ -17,18 +17,18 @@ class ServoMotor:
         self.pi.set_mode(OPEN_GPIO, pigpio.OUTPUT)
 
     def close(self):
-        if not self.is_open:
-            return
-        self.pi.set_servo_pulsewidth(CLOSE_GPIO, 1380)
-        self.pi.set_servo_pulsewidth(OPEN_GPIO, 1515)
-        time.sleep(0.9)
+        # if not self.is_open:
+        #     return
+        self.pi.set_servo_pulsewidth(CLOSE_GPIO, 1200)
+        self.pi.set_servo_pulsewidth(OPEN_GPIO, 1600)
+        time.sleep(0.3)
         self.pi.set_servo_pulsewidth(CLOSE_GPIO, 0)
         self.pi.set_servo_pulsewidth(OPEN_GPIO, 0)
         self.is_open = False
 
     def open(self):
-        if self.is_open:
-            return
+        # if self.is_open:
+        #     return
         self.pi.set_servo_pulsewidth(OPEN_GPIO, 1385)
         self.pi.set_servo_pulsewidth(CLOSE_GPIO, 1490)
         time.sleep(1.1)
@@ -58,4 +58,4 @@ class ServoMotor:
 # white
 # first forward = 1500
 # center = 1460
-# first backward = 1435
+#jfirst backward = 1435
