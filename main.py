@@ -88,7 +88,6 @@ def motion_detector(args):
             last_event_ts = now
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(f"[MOTION] {timestamp} | area≈{int(biggest_area)}")
-            cv2.imwrite(f"{timestamp}.jpg", frame)
 
 
 
@@ -99,8 +98,6 @@ def parse_args():
                    help="Minimum contour area to consider as motion (higher = less sensitive).")
     p.add_argument("--cooldown", type=float, default=1.0,
                    help="Seconds to wait between motion prints (debounce).")
-    p.add_argument("--show", action="store_true",
-                   help="Show live preview and motion mask (GUI).")
     p.add_argument("--width", type=int, default=640, help="Frame width.")
     p.add_argument("--height", type=int, default=480, help="Frame height.")
     p.add_argument("--open", type=int, default=0, help="open")
@@ -111,13 +108,13 @@ def parse_args():
 if __name__ == "__main__":
     try:
         args = parse_args()
-        motion_detector(args)
+        # motion_detector(args)
 
-        print(args.open)
-        if args.open == 1:
-            servo_motor.open()
-        elif args.close == 1:
-            servo_motor.close()
+        # print(args.open)
+        # if args.open == 1:
+        #     servo_motor.open()
+        # elif args.close == 1:
+        #     servo_motor.close()
 
     except KeyboardInterrupt:
         servo_motor.pi.stop()
