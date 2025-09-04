@@ -1,0 +1,7 @@
+venv/
+yolov5/
+CatCover.Data/
+runs/
+yolo11n.pt
+
+
