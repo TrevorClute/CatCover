@@ -12,8 +12,22 @@ import cv2
 
 WIDTH = 640
 HEIGHT = 480
+IMAGE_SIZE = 640
 
 servo_motor = ServoMotor()
+
+
+def letter_box(img: np.uint8):
+    h0, w0 = img.shape[:2]
+    r = min(IMAGE_SIZE/h0, IMAGE_SIZE/w0)
+    new_unpad = (int(round(w0*r)), int(round(h0*r)))
+    im_resized = cv2.resize(img, new_unpad, interpolation=cv2.INTER_LINEAR)
+    dw, dh = IMAGE_SIZE - new_unpad[0], IMAGE_SIZE - new_unpad[1]
+    top, bottom = dh//2, dh - dh//2
+    left, right = dw//2, dw - dw//2
+    im_padded = cv2.copyMakeBorder(
+        im_resized, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(0, 0, 0))
+    return im_padded
 
 
 def get_frame_from_picamera2(args):
@@ -90,7 +104,6 @@ def motion_detector(args):
             print(f"[MOTION] {timestamp} | area≈{int(biggest_area)}")
 
 
-
 def parse_args():
     p = argparse.ArgumentParser(
         description="Simple motion detection from Raspberry Pi camera.")
@@ -110,11 +123,15 @@ if __name__ == "__main__":
         args = parse_args()
         # motion_detector(args)
 
-        # print(args.open)
-        # if args.open == 1:
-        #     servo_motor.open()
-        # elif args.close == 1:
-        #     servo_motor.close()
+        img = cv2.imread("first_frame.jpg")
+        new_img = letter_box(img)
+        cv2.imwrite("newimg.jpg", new_img)
+
+        print(args.open)
+        if args.open == 1:
+            servo_motor.open()
+        elif args.close == 1:
+            servo_motor.close()
 
     except KeyboardInterrupt:
         servo_motor.pi.stop()
