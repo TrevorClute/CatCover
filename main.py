@@ -5,6 +5,7 @@ import time
 import argparse
 from datetime import datetime
 from ServoMotor import ServoMotor
+from NcnnModel import NcnnNodel
 import numpy as np
 from picamera2 import Picamera2
 import cv2
@@ -15,19 +16,7 @@ HEIGHT = 480
 IMAGE_SIZE = 640
 
 servo_motor = ServoMotor()
-
-
-def letter_box(img: np.uint8):
-    h0, w0 = img.shape[:2]
-    r = min(IMAGE_SIZE/h0, IMAGE_SIZE/w0)
-    new_unpad = (int(round(w0*r)), int(round(h0*r)))
-    im_resized = cv2.resize(img, new_unpad, interpolation=cv2.INTER_LINEAR)
-    dw, dh = IMAGE_SIZE - new_unpad[0], IMAGE_SIZE - new_unpad[1]
-    top, bottom = dh//2, dh - dh//2
-    left, right = dw//2, dw - dw//2
-    im_padded = cv2.copyMakeBorder(
-        im_resized, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(0, 0, 0))
-    return im_padded
+ncnn_model = NcnnNodel()
 
 
 def get_frame_from_picamera2(args):
@@ -61,7 +50,7 @@ def motion_detector(args):
 
     print(f"[INFO] Using backend: {backend}")
     print(
-        f"[INFO] min_area={args.min_area}, cooldown={args.cooldown}s, show={args.show}")
+        f"[INFO] min_area={args.min_area}, cooldown={args.cooldown}s")
 
     # Background subtractor
     backsub = cv2.createBackgroundSubtractorMOG2(
@@ -74,10 +63,9 @@ def motion_detector(args):
 
     for frame in frame_source:
         now = time.time()
+        fgmask = backsub.apply(frame)
         if (now - last_event_ts) < args.cooldown:
             continue
-        # Process frame
-        fgmask = backsub.apply(frame)
         # Morphology to clean noise
         fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel, iterations=1)
         fgmask = cv2.dilate(fgmask, kernel, iterations=2)
@@ -92,7 +80,6 @@ def motion_detector(args):
 
         for cnt in contours:
             area = cv2.contourArea(cnt)
-            print(area)
             if area > args.min_area:
                 motion_detected = True
                 if area > biggest_area:
@@ -102,14 +89,23 @@ def motion_detector(args):
             last_event_ts = now
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(f"[MOTION] {timestamp} | area≈{int(biggest_area)}")
+            predictions = ncnn_model.predict(frame)
+            # print(predictions)
+            highest_conf = max(
+                    predictions, key=lambda d: d.get("conf"), default={"conf":0, "name":""})
+            highest_conf_name = highest_conf.get("name")
+            if highest_conf_name == "marbles":
+                servo_motor.close()
+            else:
+                servo_motor.open()
 
 
 def parse_args():
     p = argparse.ArgumentParser(
         description="Simple motion detection from Raspberry Pi camera.")
-    p.add_argument("--min-area", type=int, default=1000,
+    p.add_argument("--min-area", type=int, default=2000,
                    help="Minimum contour area to consider as motion (higher = less sensitive).")
-    p.add_argument("--cooldown", type=float, default=1.0,
+    p.add_argument("--cooldown", type=float, default=2.0,
                    help="Seconds to wait between motion prints (debounce).")
     p.add_argument("--width", type=int, default=640, help="Frame width.")
     p.add_argument("--height", type=int, default=480, help="Frame height.")
@@ -121,21 +117,11 @@ def parse_args():
 if __name__ == "__main__":
     try:
         args = parse_args()
-        # motion_detector(args)
-
-        img = cv2.imread("first_frame.jpg")
-        new_img = letter_box(img)
-        cv2.imwrite("newimg.jpg", new_img)
-
-        print(args.open)
-        if args.open == 1:
-            servo_motor.open()
-        elif args.close == 1:
-            servo_motor.close()
+        motion_detector(args)
 
     except KeyboardInterrupt:
         servo_motor.pi.stop()
         print("\n[INFO] Exiting (Ctrl+C).")
     except Exception as e:
-        print(f"[ERROR] {e}")
+        print(f"[ERROR] {e.with_traceback()}")
         sys.exit(1)

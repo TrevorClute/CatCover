@@ -4,5 +4,7 @@ CatCover.Data/
 runs/
 yolo11n.pt
 env/
+ncnn/
+
 
 
