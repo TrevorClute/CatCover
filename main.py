@@ -88,25 +88,26 @@ def motion_detector(args):
         if motion_detected:
             last_event_ts = now
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"[MOTION] {timestamp} | area≈{int(biggest_area)}")
-            cv2.imwrite(f"imgs/{timestamp}.jpg",frame)
-            # predictions = ncnn_model.predict(frame)
-            # print(predictions)
-            # highest_conf = max(
-            #         predictions, key=lambda d: d.get("conf"), default={"conf":0, "name":""})
-            # highest_conf_name = highest_conf.get("name")
-            # if highest_conf_name == "marbles":
-            #     servo_motor.close()
-            # else:
-            #     servo_motor.open()
+            predictions = ncnn_model.predict(frame)
+            highest_conf = max(
+                    predictions, key=lambda d: d.get("conf"), default={"conf":0, "name":""})
+            highest_conf_name = highest_conf.get("name")
+
+            print(f"{highest_conf}\ntime={timestamp}\narea≈{int(biggest_area)}\n")
+            if highest_conf_name == "marbles":
+                servo_motor.close()
+            else:
+                servo_motor.open()
+
+            # cv2.imwrite(f"imgs/{timestamp}.jpg", frame)
 
 
 def parse_args():
     p = argparse.ArgumentParser(
         description="Simple motion detection from Raspberry Pi camera.")
-    p.add_argument("--min-area", type=int, default=2000,
+    p.add_argument("--min-area", type=int, default=3000,
                    help="Minimum contour area to consider as motion (higher = less sensitive).")
-    p.add_argument("--cooldown", type=float, default=0.2,
+    p.add_argument("--cooldown", type=float, default=0.0,
                    help="Seconds to wait between motion prints (debounce).")
     p.add_argument("--width", type=int, default=640, help="Frame width.")
     p.add_argument("--height", type=int, default=480, help="Frame height.")
