@@ -93,13 +93,13 @@ def motion_detector(args):
                     predictions, key=lambda d: d.get("conf"), default={"conf":0, "name":""})
             highest_conf_name = highest_conf.get("name")
 
-            print(f"{predictions}\ntime={timestamp}\narea≈{int(biggest_area)}\n")
-            if highest_conf_name == "marbles":
+            print(f"{highest_conf}\ntime={timestamp}\narea≈{int(biggest_area)}\n")
+            if highest_conf_name == "marbles" and highest_conf.get("conf") > 0.9:
                 servo_motor.close()
             else:
                 servo_motor.open()
 
-            cv2.imwrite(f"imgs/{timestamp}.jpg", frame)
+            cv2.imwrite(f"imgs/{timestamp} -- {highest_conf}.jpg", frame)
 
 
 def parse_args():

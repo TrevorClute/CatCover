@@ -29,7 +29,7 @@ class NcnnNodel:
     def predict(self, img):
         predictions = []
         img = letter_box(img)
-        results = self.model.predict(source=img, imgsz=640, conf=0.9, save=False)
+        results = self.model.predict(source=img, imgsz=640, conf=0.8, save=False)
         result = results[0]
         for box in result.boxes:
             conf = float(box.conf[0])
