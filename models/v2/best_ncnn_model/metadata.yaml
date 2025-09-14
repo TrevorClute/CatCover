@@ -1,0 +1,19 @@
+description: Ultralytics YOLO11n model trained on CatCoverV1.v12-mvp.yolov11/data.yaml
+author: Ultralytics
+date: '2025-09-14T17:51:31.934317'
+version: 8.3.193
+license: AGPL-3.0 License (https://ultralytics.com/license)
+docs: https://docs.ultralytics.com
+stride: 32
+task: detect
+batch: 1
+imgsz:
+- 640
+- 640
+names:
+  0: marbles
+  1: teddy_or_jesse
+args:
+  batch: 1
+  half: false
+channels: 3
