@@ -91,7 +91,7 @@ def motion_detector(args):
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             predictions = ncnn_model.predict(frame)
             highest_conf = max(
-                    predictions, key=lambda d: d.get("conf"), default={"conf":0, "name":""})
+                predictions, key=lambda d: d.get("conf"), default={"conf": 0, "name": ""})
             highest_conf_name = highest_conf.get("name")
 
             print(f"{highest_conf}\ntime={timestamp}\narea≈{int(biggest_area)}\n")
