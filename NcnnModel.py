@@ -23,13 +23,13 @@ def letter_box(img: np.uint8):
 
 
 class NcnnNodel:
-    model = YOLO("./models/v1/best_ncnn_model/", task="detect")
+    model = YOLO("./models/v2/best_ncnn_model/", task="detect")
     def __init__(self):
         pass
     def predict(self, img):
         predictions = []
         img = letter_box(img)
-        results = self.model.predict(source=img, imgsz=640, conf=0.5, save=False)
+        results = self.model.predict(source=img, imgsz=640, conf=0.5, save=True)
         result = results[0]
         for box in result.boxes:
             conf = float(box.conf[0])

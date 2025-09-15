@@ -54,7 +54,7 @@ def motion_detector(args):
 
     # Background subtractor
     backsub = cv2.createBackgroundSubtractorMOG2(
-        history=500, varThreshold=16, detectShadows=True)
+        history=500, varThreshold=16, detectShadows=False)
 
     # Morphology kernel
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
@@ -66,6 +66,7 @@ def motion_detector(args):
         fgmask = backsub.apply(frame)
         if (now - last_event_ts) < args.cooldown:
             continue
+
         # Morphology to clean noise
         fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel, iterations=1)
         fgmask = cv2.dilate(fgmask, kernel, iterations=2)
@@ -94,20 +95,20 @@ def motion_detector(args):
             highest_conf_name = highest_conf.get("name")
 
             print(f"{highest_conf}\ntime={timestamp}\narea≈{int(biggest_area)}\n")
-            if highest_conf_name == "marbles" and highest_conf.get("conf") > 0.7:
+            if highest_conf_name == "marbles" and highest_conf.get("conf") > 0.71:
                 servo_motor.close()
             else:
                 servo_motor.open()
 
-            cv2.imwrite(f"imgs/{highest_conf} -- {timestamp}.jpg", frame)
+            # cv2.imwrite(f"imgs/{highest_conf} -- {timestamp}.jpg", frame)
 
 
 def parse_args():
     p = argparse.ArgumentParser(
         description="Simple motion detection from Raspberry Pi camera.")
-    p.add_argument("--min-area", type=int, default=3000,
+    p.add_argument("--min-area", type=int, default=3500,
                    help="Minimum contour area to consider as motion (higher = less sensitive).")
-    p.add_argument("--cooldown", type=float, default=0.5,
+    p.add_argument("--cooldown", type=float, default=0.9,
                    help="Seconds to wait between motion prints (debounce).")
     p.add_argument("--width", type=int, default=640, help="Frame width.")
     p.add_argument("--height", type=int, default=480, help="Frame height.")
