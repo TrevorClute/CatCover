@@ -95,12 +95,12 @@ def motion_detector(args):
             highest_conf_name = highest_conf.get("name")
 
             print(f"{highest_conf}\ntime={timestamp}\narea≈{int(biggest_area)}\n")
-            if highest_conf_name == "marbles" and highest_conf.get("conf") > 0.71:
+            if highest_conf_name == "marbles" and highest_conf.get("conf") > 0.8:
                 servo_motor.close()
             else:
                 servo_motor.open()
 
-            # cv2.imwrite(f"imgs/{highest_conf} -- {timestamp}.jpg", frame)
+            cv2.imwrite(f"imgs/{highest_conf} -- {timestamp}.jpg", frame)
 
 
 def parse_args():
