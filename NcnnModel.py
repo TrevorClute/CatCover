@@ -23,26 +23,27 @@ def letter_box(img: np.uint8):
 
 
 class NcnnNodel:
-    model = YOLO("./models/v2/best_ncnn_model/", task="detect")
+    model = YOLO("./models/v3-cls/best_ncnn_model/", task="classify")
     def __init__(self):
         pass
     def predict(self, img):
         predictions = []
         img = letter_box(img)
-        results = self.model.predict(source=img, imgsz=640, conf=0.5, save=False)
+        results = self.model.predict(source=img, imgsz=640, save=False) 
         result = results[0]
-        for box in result.boxes:
-            conf = float(box.conf[0])
-            id = int(box.cls[0])
-            name = result.names[id]
-            predictions.append({"name":name, "conf":conf})
-        return predictions
+        names = result.names
+        top5 = result.probs.top5
+        top5conf = result.probs.top5conf
+        names_and_conf = []
+        for i in range(len(top5)):
+            name = names[top5[i]]
+            conf = top5conf[i].item()
+            names_and_conf.append({"name":name, "conf":conf})
+        return names_and_conf
 
 
-
-
-
-
-
-
-
+# def main():
+#     model = NcnnNodel()
+#     image = cv2.imread("imgs/{'name': 'marbles', 'conf': 0.9162629842758179} -- 2025-09-16 21:01:37.jpg")
+#     model.predict(image)
+# main()
