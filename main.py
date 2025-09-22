@@ -24,12 +24,16 @@ def get_frame_from_picamera2(args):
     picam2 = Picamera2()
 
     # Configure preview/stream size
-    width = args.width
-    height = args.height
+    # width = args.width
+    # height = args.height
 
     # Create a simple preview configuration in RGB888
+    # config = picam2.create_preview_configuration(
+    #     main={"size": (width, height), "format": "RGB888"}
+    # )
+
     config = picam2.create_preview_configuration(
-        main={"size": (width, height), "format": "RGB888"}
+        main={"size": (224, 224), "format": "RGB888"}
     )
     picam2.configure(config)
     # picam2.set_controls({"FrameRate": 1.0})
@@ -88,19 +92,21 @@ def motion_detector(args):
 
         if motion_detected:
             last_event_ts = now
-            # timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            predictions = ncnn_model.predict(frame)
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            if predictions[0]["name"] == "marbles":
-                servo_motor.close()
-                args.cooldown = 0
-            elif predictions[1]["name"] == "teddy_or_jesse":
-                servo_motor.open()
-                args.cooldown = 0.5
-            else:
-                args.cooldown = 0.3
+            # predictions = ncnn_model.predict(frame)
 
+            # if predictions[0]["name"] == "marbles":
+            #     servo_motor.close()
+            #     args.cooldown = 0
+            # elif predictions[1]["name"] == "teddy_or_jesse":
+            #     servo_motor.open()
+            #     args.cooldown = 0.5
+            # else:
+            #     args.cooldown = 0.3
+            #
             # cv2.imwrite(f"imgs/{predictions[0]['name']} {predictions[0]['conf']} -- {timestamp}.jpg", frame)
+            cv2.imwrite(f"imgs/{timestamp}.png", frame)
 
 
 def parse_args():
