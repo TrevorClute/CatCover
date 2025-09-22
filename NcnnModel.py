@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import sys
 from ultralytics import YOLO
 
 
@@ -19,17 +20,16 @@ def letter_box(img: np.uint8):
     return im_padded
 
 
-
-
-
 class NcnnNodel:
     model = YOLO("./models/v3-cls/best_ncnn_model/", task="classify")
+
     def __init__(self):
         pass
+
     def predict(self, img):
         predictions = []
         img = letter_box(img)
-        results = self.model.predict(source=img, imgsz=640, save=False) 
+        results = self.model.predict(source=img, imgsz=640, save=False)
         result = results[0]
         names = result.names
         top5 = result.probs.top5
@@ -38,12 +38,16 @@ class NcnnNodel:
         for i in range(len(top5)):
             name = names[top5[i]]
             conf = top5conf[i].item()
-            names_and_conf.append({"name":name, "conf":conf})
+            names_and_conf.append({"name": name, "conf": conf})
         return names_and_conf
 
 
-# def main():
-#     model = NcnnNodel()
-#     image = cv2.imread("imgs/{'name': 'marbles', 'conf': 0.9162629842758179} -- 2025-09-16 21:01:37.jpg")
-#     model.predict(image)
-# main()
+def main():
+
+    model = NcnnNodel()
+    # image = cv2.imread("imgs/{'name': 'marbles', 'conf': 0.9162629842758179} -- 2025-09-16 21:01:37.jpg")
+    image = cv2.imread("imgs/{'name': 'marbles', 'conf': 0.9449678063392639} -- 2025-09-16 10:20:31.jpg")
+    model.predict(image)
+
+
+main()
