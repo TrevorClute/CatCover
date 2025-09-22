@@ -100,8 +100,7 @@ def motion_detector(args):
             else:
                 args.cooldown = 0.3
 
-            # cv2.imwrite(
-                # f"imgs/{predictions[0]['name']} {predictions[0]['conf']} -- {timestamp}.jpg", frame)
+            # cv2.imwrite(f"imgs/{predictions[0]['name']} {predictions[0]['conf']} -- {timestamp}.jpg", frame)
 
 
 def parse_args():

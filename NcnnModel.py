@@ -46,8 +46,8 @@ def main():
 
     model = NcnnNodel()
     # image = cv2.imread("imgs/{'name': 'marbles', 'conf': 0.9162629842758179} -- 2025-09-16 21:01:37.jpg")
-    image = cv2.imread("imgs/{'name': 'marbles', 'conf': 0.9449678063392639} -- 2025-09-16 10:20:31.jpg")
+    image = cv2.imread("imgs/{'name': 'marbles', 'conf': 0.9449678063392639} -- 2025-09-16 10/20/31.jpg")
     model.predict(image)
 
 
-main()
+# main()
