@@ -10,6 +10,8 @@ import numpy as np
 from picamera2 import Picamera2
 import cv2
 
+from libcamera import Transform
+
 
 WIDTH = 640
 HEIGHT = 480
@@ -31,10 +33,23 @@ def get_frame_from_picamera2(args):
     # config = picam2.create_preview_configuration(
     #     main={"size": (width, height), "format": "RGB888"}
     # )
+    # 1) Pick the largest native sensor mode (max area = width*height)
+    best = max(picam2.sensor_modes, key=lambda m: m["size"][0] * m["size"][1])
+    W, H = best["size"]
 
-    config = picam2.create_preview_configuration(
-        main={"size": (224, 224), "format": "RGB888"}
+    # 2) Configure video with the sensor’s full aspect ratio & no crop
+    #    - Use the mode's native size to avoid aspect-crop
+    #    - ScalerCrop set to the full frame (no digital zoom)
+    config = picam2.create_video_configuration(
+        main={"size": (W, H), "format": "RGB888"},   # or "XBGR8888" if you prefer
+        transform=Transform(),                       # no flips/rotations
+        buffer_count=4,
+        controls={"ScalerCrop": (0, 0, W, H)}        # full sensor area
     )
+
+    # config = picam2.create_video_configuration(
+    #     main={"size": (640, 480), "format": "RGB888"}
+    # )
     picam2.configure(config)
     # picam2.set_controls({"FrameRate": 1.0})
     picam2.start()
@@ -94,19 +109,20 @@ def motion_detector(args):
             last_event_ts = now
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            # predictions = ncnn_model.predict(frame)
+            predictions = ncnn_model.predict(frame)
 
-            # if predictions[0]["name"] == "marbles":
-            #     servo_motor.close()
-            #     args.cooldown = 0
-            # elif predictions[1]["name"] == "teddy_or_jesse":
-            #     servo_motor.open()
-            #     args.cooldown = 0.5
-            # else:
-            #     args.cooldown = 0.3
-            #
-            # cv2.imwrite(f"imgs/{predictions[0]['name']} {predictions[0]['conf']} -- {timestamp}.jpg", frame)
-            cv2.imwrite(f"imgs/{timestamp}.png", frame)
+            if predictions[0]["name"] == "marbles":
+                # servo_motor.close()
+                cv2.imwrite(f"imgs/m {predictions[0]['conf']} -- {timestamp}.jpg", frame)
+                args.cooldown = 0
+            elif predictions[0]["name"] == "teddy_or_jesse":
+                # servo_motor.open()
+                cv2.imwrite(f"imgs/tj {predictions[0]['conf']} -- {timestamp}.jpg", frame)
+                args.cooldown = 0.5
+            else:
+                args.cooldown = 0.3
+
+
 
 
 def parse_args():
@@ -114,7 +130,7 @@ def parse_args():
         description="Simple motion detection from Raspberry Pi camera.")
     p.add_argument("--min-area", type=int, default=3500,
                    help="Minimum contour area to consider as motion (higher = less sensitive).")
-    p.add_argument("--cooldown", type=float, default=0.3,
+    p.add_argument("--cooldown", type=float, default=0.0,
                    help="Seconds to wait between motion prints (debounce).")
     p.add_argument("--width", type=int, default=640, help="Frame width.")
     p.add_argument("--height", type=int, default=480, help="Frame height.")
